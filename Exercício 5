@@ -1,0 +1,69 @@
+import numpy as np
+
+# Definindo a função f(x1, x2)
+def f(x):
+    x1, x2 = x
+    return x1**2 - x1*x2 + 2*x2**2 - 2*x1 + np.exp(x1 + x2)
+
+# Gradiente da função
+def gradient_f(x):
+    x1, x2 = x
+    df_dx1 = 2*x1 - x2 - 2 + np.exp(x1 + x2)
+    df_dx2 = -x1 + 4*x2 + np.exp(x1 + x2)
+    return np.array([df_dx1, df_dx2])
+
+# Matriz Hessiana da função
+def hessian_f(x):
+    x1, x2 = x
+    H11 = 2 + np.exp(x1 + x2)
+    H12 = -1 + np.exp(x1 + x2)
+    H22 = 4 + np.exp(x1 + x2)
+    return np.array([[H11, H12], [H12, H22]])
+
+# Verificar se a matriz Hessiana é positiva definida (convexidade)
+def is_positive_definite(H):
+    eigenvalues = np.linalg.eigvals(H)
+    return np.all(eigenvalues > 0)
+
+# Calcular a curvatura em uma direção d
+def curvature_in_direction(H, d):
+    d = d / np.linalg.norm(d)  # Normalizar o vetor direção
+    return np.dot(d, np.dot(H, d))
+
+# Decomposição de Cholesky para pré-condicionar
+def cholesky_decomposition(H):
+    return np.linalg.cholesky(H)
+
+# Ponto específico
+x_bar = np.array([0, 0])
+
+# Calculando o gradiente no ponto x_bar
+grad_at_x_bar = gradient_f(x_bar)
+
+# Calculando a matriz Hessiana
+H = hessian_f(x_bar)
+
+# Verificando convexidade
+is_convex = is_positive_definite(H)
+
+# Direção específica (exemplo: d = [1, 1])
+d = np.array([1, 1])
+curvature = curvature_in_direction(H, d)
+
+# Decomposição de Cholesky
+L = cholesky_decomposition(H)
+
+# Imprimindo os resultados
+print("Gradiente no ponto x_bar = (0, 0):")
+print(grad_at_x_bar)
+
+print("\nMatriz Hessiana:")
+print(H)
+
+print("\nA função é convexa?", is_convex)
+
+print("\nCurvatura na direção d = [1, 1]:")
+print(curvature)
+
+print("\nFatoração de Cholesky da matriz Hessiana (L):")
+print(L)
