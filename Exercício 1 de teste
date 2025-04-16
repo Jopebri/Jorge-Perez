@@ -1,0 +1,59 @@
+import numpy as np
+from scipy.optimize import minimize
+
+# Função objetiva
+def objective_function(x):
+    x1, x2 = x
+    return (1/3) * x1**3 + x2**3 - x1 - x2
+
+# Gradiente da função
+def gradient(x):
+    x1, x2 = x
+    df_dx1 = x1**2 - 1
+    df_dx2 = 3 * x2**2 - 1
+    return np.array([df_dx1, df_dx2])
+
+# Hessiana da função
+def hessian(x):
+    x1, x2 = x
+    H = np.array([[2 * x1, 0],
+                  [0, 6 * x2]])
+    return H
+
+# Ponto inicial
+x0 = np.array([1.0, 1.0])
+
+# Métodos de otimização
+methods = {
+    "Nelder-Mead": {"method": "Nelder-Mead"},
+    "BFGS": {"method": "BFGS", "jac": gradient},
+    "Newton-CG": {"method": "Newton-CG", "jac": gradient, "hess": hessian},
+    "trust-ncg": {"method": "trust-ncg", "jac": gradient, "hess": hessian},
+    "trust-krylov": {"method": "trust-krylov", "jac": gradient, "hess": hessian},
+}
+
+# Executa as otimizações e armazena resultados
+results = {}
+
+for name, opts in methods.items():
+    res = minimize(objective_function, x0, **opts)
+    results[name] = {
+        "x*": res.x,
+        "fval": res.fun,
+        "nfev": res.nfev,
+        "njev": res.get("njev", None),
+        "nhev": res.get("nhev", None),
+        "success": res.success
+    }
+
+# Apresenta os resultados
+print("\n==== Optimization Results ====\n")
+header = f"{'Method':<20} | {'f(x*)':>12} | {'nfev':>6} | {'njev':>6} | {'nhev':>6} | {'Success':>8}"
+print(header)
+print("-" * len(header))
+
+for method, data in results.items():
+    print(f"{method:<20} | {data['fval']:12.4e} | {data['nfev']:6d} | "
+          f"{data['njev'] if data['njev'] is not None else '  N/A':>6} | "
+          f"{data['nhev'] if data['nhev'] is not None else '  N/A':>6} | "
+          f"{str(data['success']):>8}")
