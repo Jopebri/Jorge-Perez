@@ -1,0 +1,49 @@
+import numpy as np
+from scipy.optimize import minimize
+
+# Definindo a função f(x)
+def f(x):
+    return x**2 + 1/x - 2
+
+# Gradiente da função
+def grad_f(x):
+    return 2*x - 1/(x**2)
+
+# Hessiana da função
+def hess_f(x):
+    return 2 + 2/(x**3)
+
+# Ponto inicial
+x0 = 1.0  # Escolhemos um ponto inicial no domínio x > 0
+
+# Lista de métodos de otimização
+methods = {
+    "BFGS": {"method": "BFGS", "jac": grad_f},  # Usa o gradiente
+    "Newton-CG": {"method": "Newton-CG", "jac": grad_f, "hess": hess_f},  # Usa gradiente e Hessiana
+    "Nelder-Mead": {"method": "Nelder-Mead"},  # Não usa derivadas
+}
+
+# Executa as otimizações e armazena resultados
+results = {}
+
+for name, opts in methods.items():
+    res = minimize(f, x0, **opts)
+    results[name] = {
+        "x*": res.x[0],  # Valor ótimo de x
+        "fval": res.fun,  # Valor da função no mínimo
+        "nfev": res.nfev,  # Número de avaliações da função
+        "njev": res.get("njev", None),  # Número de avaliações do gradiente
+        "success": res.success  # Indica sucesso na convergência
+    }
+
+# Apresenta os resultados com alinhamento
+print("\n==== Minimization Results ====\n")
+header = f"{'Method':<20} | {'x*':>10} | {'f(x*)':>10} | {'nfev':>6} | {'njev':>6} | {'Success':>8}"
+print(header)
+print("-" * len(header))
+
+for method, data in results.items():
+    print(f"{method:<20} | {data['x*']:10.6f} | {data['fval']:10.6f} | "
+          f"{data['nfev']:6d} | "
+          f"{data['njev'] if data['njev'] is not None else '  N/A':>6} | "
+          f"{str(data['success']):>8}")
